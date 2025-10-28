@@ -1,8 +1,20 @@
 # Volantes Cursors
 
+## Original Repo: https://github.com/varlesh/volantes-cursors
+
+### Why the fork?
+
+The original repo did only support old xcursor themes, which fail to scale cleanly (for example in KDEs 'Shake cursor' feature).
+Therefore this repo drastically improved the quality by using `kcursorgen` to generate svg themes.
+Furthermore hyprland compatibility was added by using `hyprcursor-util`.
+There are only changes to the build system, icons are still the same.
+
+All credits belong to @varlesh, if you someday read this: I would be happy to merge this into your original repo!
+
 ### Install build version
 
-https://www.pling.com/p/1356095/
+Not available for now. Check out the original repo (no svg/hyprland fixes though).
+Manual Install is currently required!
 
 ### Manual Install
 
