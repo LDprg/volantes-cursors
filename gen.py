@@ -3,11 +3,16 @@ import os
 import shutil
 import re
 import json
+import sys
 
 dir_conf = "./src/config/"
 file_list = "./src/cursorList"
 
-def gen_xcursors(NAME, dir_src, dir_out):
+
+def gen_xcursors(dir_src, dir_out):
+    if not os.path.isdir(dir_out):
+        os.makedirs(dir_out)
+
     with open(file_list, "r") as f:
         lines = f.readlines()
         for line in lines:
@@ -17,30 +22,25 @@ def gen_xcursors(NAME, dir_src, dir_out):
                 with open(dir_out + file[0], "w") as c:
                     c.write(file[1])
 
-    os.system("kcursorgen --svg-theme-to-xcursor --svg-dir=\"" + dir_src + "\" --xcursor-dir=\"" + dir_out + "\" --sizes=24 --scales=1,2.5,3")
+    os.system(
+        'kcursorgen --svg-theme-to-xcursor --svg-dir="'
+        + dir_src
+        + '" --xcursor-dir="'
+        + dir_out
+        + '" --sizes=24 --scales=1,2.5,3'
+    )
 
 
-def create_cursors(NAME):
-    dir_src = "./src/" + NAME + "/"
-    dir_base = "./build/" + NAME + "/"
-    dir_out = dir_base + "cursors_scalable/"
-    dir_png = dir_base + "cursors/"
+def gen_svgcursors(dir_src, dir_base, dir_out):
     files = os.listdir(dir_src)
 
-    if os.path.isdir(dir_base):
-        shutil.rmtree(dir_base)
-    
-    if not os.path.isdir(dir_png):
-        os.makedirs(dir_png)
-
-    os.makedirs(dir_out)
+    if not os.path.isdir(dir_out):
+        os.makedirs(dir_out)
 
     with open(dir_base + "index.theme", "w") as f:
         f.write(
-            "[Icon Theme]\n" + 
-            "Name=Volantes Cursors\n" +
-            "Comment=design by varlesh\n"
-            )
+            "[Icon Theme]\n" + "Name=Volantes Cursors\n" + "Comment=design by varlesh\n"
+        )
 
     for file in files:
         if file.endswith("_24.svg"):
@@ -59,11 +59,13 @@ def create_cursors(NAME):
                 os.makedirs(dir_cur)
 
             shutil.copy(dir_src + name + ".svg", dir_cur)
-            
+
             with open(dir_conf + path + ".cursor") as f:
                 frames = f.read()
-                frames = re.findall(r"24 *([0-9]+) *([0-9]+) *(.*)_24_24.png *([0-9]+)?", frames)
-                
+                frames = re.findall(
+                    r"24 *([0-9]+) *([0-9]+) *(.*)_24_24.png *([0-9]+)?", frames
+                )
+
                 data = []
 
                 for frame in frames:
@@ -71,7 +73,7 @@ def create_cursors(NAME):
                     hotspot_y = int(frame[1])
                     filename = str(frame[2])
                     animation = str(frame[3])
-                    
+
                     item = {
                         "filename": filename + ".svg",
                         "hotspot_x": hotspot_x,
@@ -84,10 +86,99 @@ def create_cursors(NAME):
 
                     data.append(item)
 
-                with open(dir_cur + "metadata.json", 'w') as j:
+                with open(dir_cur + "metadata.json", "w") as j:
                     json.dump(data, j, indent=4)
 
-    gen_xcursors(NAME, dir_out, dir_png)
+
+def gen_hyprcursors(dir_src, dir_base, dir_out):
+    files = os.listdir(dir_src)
+
+    if os.path.isdir(dir_base):
+        shutil.rmtree(dir_base)
+
+    if not os.path.isdir(dir_out):
+        os.makedirs(dir_out)
+
+    with open(dir_base + "manifest.hl", "w") as f:
+        f.write(
+            "name = Volantes Cursors\n"
+            + "description = desgin by varlesh\n"
+            + "cursors_directory = hyprcursor\n"
+        )
+
+    for file in files:
+        if file.endswith("_24.svg"):
+            name = file.removesuffix("_24.svg")
+
+            if file.startswith("wait"):
+                path = "wait"
+            elif file.startswith("progress"):
+                path = "progress"
+            else:
+                path = name
+            dir_cur = dir_out + path + "/"
+
+            if not os.path.isdir(dir_cur):
+                os.makedirs(dir_cur)
+
+            shutil.copy(dir_src + name + ".svg", dir_cur)
+
+            with open(dir_conf + path + ".cursor") as f:
+                frames = f.read()
+                frames = re.findall(
+                    r"24 *([0-9]+) *([0-9]+) *(.*)_24_24.png *([0-9]+)?", frames
+                )
+
+                data = []
+                once = False
+
+                for frame in frames:
+                    hotspot_x = int(frame[0])
+                    hotspot_y = int(frame[1])
+                    filename = str(frame[2])
+                    animation = str(frame[3])
+
+                    if not once:
+                        data.append("hotspot_x = " + str(float(hotspot_x) / 24) + "\n")
+                        data.append("hotspot_y = " + str(float(hotspot_y) / 24) + "\n")
+                        once = True
+
+                    item = "define_size = 24, " + filename + ".svg"
+
+                    if animation.isdecimal():
+                        item += ", " + animation
+
+                    item += "\n"
+
+                    data.append(item)
+
+                with open(dir_cur + "meta.hl", "w") as j:
+                    for line in data:
+                        j.write(line)
+
+    dir_tmp = "/tmp/hyprcursor_volantes"
+
+    if os.path.isdir(dir_tmp):
+        shutil.rmtree(dir_tmp)
+    os.makedirs(dir_tmp)
+
+    os.system("hyprcursor-util --create " + dir_base + " -o " + dir_tmp)
+
+    shutil.rmtree(dir_out)
+    shutil.copytree(dir_tmp + "/theme_Volantes Cursors/hyprcursor", dir_out)
+
+
+def create_cursors(NAME, hypr):
+    dir_src = "./src/" + NAME + "/"
+    dir_base = "./build/" + NAME + "/"
+    dir_hypr = dir_base + "hyprcursor/"
+    dir_out = dir_base + "cursors_scalable/"
+    dir_png = dir_base + "cursors/"
+
+    if hypr:
+        gen_hyprcursors(dir_src, dir_base, dir_hypr)
+    gen_svgcursors(dir_src, dir_base, dir_out)
+    gen_xcursors(dir_out, dir_png)
 
     os.system("cd build && tar -cf " + NAME.replace("_", "-") + ".tar.gz " + NAME)
 
@@ -96,6 +187,15 @@ dir_base = "./build"
 if os.path.isdir(dir_base):
     shutil.rmtree(dir_base)
 
-create_cursors("volantes_cursors")
-create_cursors("volantes_light_cursors")
+hypr = False
 
+for arg in sys.argv[1:]:
+    if arg == "--hyprcursor":
+        hypr = True
+    else:
+        print("Unkown arg: ", arg)
+        print("Use --hyprcursor to generate hyprcursors!")
+        exit()
+
+create_cursors("volantes_cursors", hypr)
+create_cursors("volantes_light_cursors", hypr)
