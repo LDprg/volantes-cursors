@@ -8,8 +8,9 @@ https://www.pling.com/p/1356095/
 
 1. Install dependencies:
    - git
+   - tar
    - kcursorgen
-   - hyprcursor (only for hyprcusors)
+   - hyprcursor-util (only for hyprcusors)
 
 2. Run the following commands as normal user:
 
