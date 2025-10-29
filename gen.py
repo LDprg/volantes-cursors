@@ -76,7 +76,7 @@ def gen_svgcursors(dir_src, dir_base, dir_out):
             if not os.path.isdir(dir_cur):
                 os.makedirs(dir_cur)
 
-            shutil.copy(dir_src + name + ".svg", dir_cur)
+            shutil.copy(dir_src + file, dir_cur + name + ".svg")
 
             with open(dir_conf + path + ".cursor") as f:
                 frames = f.read()
@@ -139,7 +139,7 @@ def gen_hyprcursors(dir_src, dir_base, dir_out):
             if not os.path.isdir(dir_cur):
                 os.makedirs(dir_cur)
 
-            shutil.copy(dir_src + name + ".svg", dir_cur)
+            shutil.copy(dir_src + file, dir_cur + name + ".svg")
 
             with open(dir_conf + path + ".cursor") as f:
                 frames = f.read()
