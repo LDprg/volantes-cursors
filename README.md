@@ -30,7 +30,7 @@ Manual Install is currently required!
    git clone https://github.com/varlesh/volantes-cursors.git
    cd volantes-cursors
    python gen.py
-   sudo python install.py
+   sudo python install.py # System wide install
    ```
 
    For hyprcusors use following instead:
@@ -39,7 +39,7 @@ Manual Install is currently required!
    git clone https://github.com/varlesh/volantes-cursors.git
    cd volantes-cursors
    python gen.py --hyprcursor
-   sudo python install.py
+   python install_local.py # Local user install
    ```
 
 3. Choose a theme in the Settings or in the Tweaks tool.
