@@ -8,6 +8,12 @@ import sys
 dir_conf = "./src/config/"
 file_list = "./src/cursorList"
 
+def try_utf8(data):
+    "Returns a Unicode object on success, or None on failure"
+    try:
+       return data.decode('utf-8')
+    except UnicodeDecodeError:
+       return None
 
 def gen_xcursors(dir_src, dir_out):
     if not os.path.isdir(dir_out):
@@ -27,8 +33,20 @@ def gen_xcursors(dir_src, dir_out):
         + dir_src
         + '" --xcursor-dir="'
         + dir_out
-        + '" --sizes=24 --scales=1,2.5,3'
+        + '" --sizes=24 --scales=1,1.3333,2,2.5,3'
     )
+
+    # Fix broken/missing links of kcursorgen (this is needed for xwayland and other old cursor)
+    files = os.listdir(dir_out)
+    for file1 in files:
+        with open(dir_out + file1, "rb") as f:
+            content = try_utf8(f.readline())
+
+            if content is not None:
+                for file2 in files:
+                    if content == file2:
+                        os.remove(dir_out + file1)
+                        os.system("ln -sr " + dir_out + file2 + " " + dir_out + file1)
 
 
 def gen_svgcursors(dir_src, dir_base, dir_out):
