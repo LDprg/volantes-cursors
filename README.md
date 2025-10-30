@@ -22,6 +22,7 @@ Manual Install is currently required!
    - git
    - tar
    - kcursorgen
+   - xcursorgen
    - hyprcursor-util (only for hyprcusors)
 
 2. Run the following commands as normal user:
