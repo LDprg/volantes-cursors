@@ -10,6 +10,7 @@ https://www.pling.com/p/1356095/
    - git
    - tar
    - kcursorgen
+   - xcursorgen
    - hyprcursor-util (only for hyprcusors)
 
 2. Run the following commands as normal user:
