@@ -8,12 +8,14 @@ import sys
 dir_conf = "./src/config/"
 file_list = "./src/cursorList"
 
+
 def try_utf8(data):
     "Returns a Unicode object on success, or None on failure"
     try:
-       return data.decode('utf-8')
+        return data.decode("utf-8")
     except UnicodeDecodeError:
-       return None
+        return None
+
 
 def gen_xcursors(dir_src, dir_out):
     if not os.path.isdir(dir_out):
@@ -173,6 +175,22 @@ def gen_hyprcursors(dir_src, dir_base, dir_out):
                 with open(dir_cur + "meta.hl", "w") as j:
                     for line in data:
                         j.write(line)
+
+    files = os.listdir(dir_out)
+    with open(dir_src + "../cursorList", "r") as f:
+        for line in f.readlines():
+            content = line.strip().split(" ")
+            found = False
+
+            for file1 in files:
+                if content[0] == file1:
+                    found = True
+
+            if not found:
+                dir_ref = dir_out + content[1] + "/meta.hl"
+                if os.path.exists(dir_ref):
+                    with open(dir_ref, "a") as j:
+                        j.write("define_override = " + content[0] + "\n")
 
     dir_tmp = "/tmp/hyprcursor_volantes"
 
